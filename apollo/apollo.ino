@@ -9,8 +9,12 @@ int yellowLed = 12;
 int greenLed = 11;
 int blueLed = 10;
 
-float maxY = 0;
+float maxY = 0.0;
 float yforce = 0.0;
+
+enum state = {START, PLAY, RESULTS, WAIT};
+
+state currentState = PLAY;
 
 void setup() {
 
@@ -36,12 +40,41 @@ void setup() {
 }
 
 void loop() {
+
+  lcdMaxScore();
+
+  switch(currentState) {
+    case START:
+      startState();
+
+    case PLAY:
+      playState();
+
+    case RESULTS:
+      resultsState();
+
+    case WAIT:
+      waitState();
+
+    case END;
+      endState();
+
+  }
+
+}
+
+// Initial power on
+void startState() {
+  currentState = PLAY;
+  return;
+
+}
+
+// Player can throw
+void playState() {
   int16_t ax, ay, az, gx, gy, gz;
 
   int time = 1000;
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(String(maxY));
 
   while(time != 0) {
     digitalWrite(blueLed, HIGH);
@@ -53,6 +86,7 @@ void loop() {
 
     time--;
     delay(1);
+
   }
 
   lcd.setCursor(0, 1);
@@ -60,6 +94,14 @@ void loop() {
 
   digitalWrite(blueLed, LOW);
 
+  currentState = RESULTS;
+    
+  return;
+
+}
+
+// calculating + displaying results
+void resultsState() {
   if(abs(yforce) > abs(maxY)) {
     maxY = yforce;
     digitalWrite(greenLed, HIGH);
@@ -74,9 +116,30 @@ void loop() {
     
   }
 
+  currentState = WAIT;
+
+}
+
+// in between state for passing to other player(s)
+void waitState() {
   yforce = 0.0;
   digitalWrite(redLed, HIGH);
   delay(2500);
   digitalWrite(redLed, LOW);
 
+  currentState = PLAY;
+
+}
+
+// end the game
+void endState() {
+  // add end state functionality
+  // if user decides to end the game, turn off arduino
+  // if user wants to restart the game, set everything back to original values
+}
+
+void lcdMaxScore() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(String(maxY));
 }
