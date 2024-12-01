@@ -4,15 +4,13 @@
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 MPU6050 mpu;
-int redLed = 13;
-int yellowLed = 12;
-int greenLed = 11;
-int blueLed = 10;
 
-float maxY = 0.0;
-float yforce = 0.0;
+int redLed = 11, greenLed = 10, blueLed = 9;
+int pauseButton = 7, stateButton = 6, endButton = 5;
 
-enum state {START, PLAY, RESULTS, WAIT, END};
+int maxY = 0.0, yforce = 0.0;
+
+enum state {START, PLAY, RESULTS, WAIT, END, PAUSE};
 
 state currentState = PLAY;
 
@@ -24,9 +22,12 @@ void setup()
   mpu.setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 
   pinMode(redLed, OUTPUT);
-  pinMode(yellowLed, OUTPUT);
   pinMode(greenLed, OUTPUT);
   pinMode(blueLed, OUTPUT);
+
+  lightColor(255, 255, 0);
+
+  pinMode(pauseButton, INPUT_PULLUP);
 
   lcd.init();
   lcd.backlight();
@@ -34,8 +35,10 @@ void setup()
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Starting...");
+  delay(1000);
+  lcd.clear();
 
-  Serial.begin(1);
+  Serial.begin(9600);
   Serial.println("Starting");
 
 }
@@ -44,30 +47,47 @@ void loop()
 {
 
   lcdMaxScore();
+  Serial.println(digitalRead(pauseButton));
 
-  while(1)
+  if(digitalRead(pauseButton) == 0 && currentState != PAUSE)
   {
-    switch(currentState) 
-  { 
-      case START:
-        startState();
-
-      case PLAY:
-        playState();
-
-      case RESULTS:
-        resultsState();
-
-      case WAIT:
-        waitState();
-
-      case END:
-        endState();
-
-    }
+    currentState = PAUSE;
   }
-  
 
+  switch(currentState) 
+  { 
+    case START:
+      startState();
+      break;
+
+    case PLAY:
+      playState();
+      break;
+
+    case RESULTS:
+      resultsState();
+      break;
+
+    case WAIT:
+      waitState();
+      break;
+
+    case PAUSE:
+      pauseState();
+      break;
+
+    case END:
+      endState();
+      break;
+
+  }
+}
+
+void lightColor(int r, int g, int b)
+{
+  analogWrite(redLed, r);
+  analogWrite(greenLed, g);
+  analogWrite(blueLed, b);
 }
 
 // Initial power on
@@ -87,7 +107,8 @@ void playState()
 
   while(time != 0) 
   {
-    digitalWrite(blueLed, HIGH);
+    lightColor(0, 0, 255);
+
     mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     
     if(abs(gy) > abs(yforce)) {
@@ -100,9 +121,11 @@ void playState()
   }
 
   lcd.setCursor(0, 1);
-  lcd.print(String(yforce));
+  lcd.print("                    ");
+  lcd.setCursor(0, 1);
+  lcd.print("Attempt: " + String(yforce));
 
-  digitalWrite(blueLed, LOW);
+  lightColor(0, 0, 0);
 
   currentState = RESULTS;
     
@@ -116,17 +139,17 @@ void resultsState()
   if(abs(yforce) > abs(maxY)) 
     {
     maxY = yforce;
-    digitalWrite(greenLed, HIGH);
-    digitalWrite(yellowLed, LOW);
+    lightColor(0, 255, 0);
+    lcdMaxScore();
     delay(5000);
-    digitalWrite(greenLed, LOW);
+    lightColor(0, 0, 0);
 
   } 
   else 
   {
-    digitalWrite(yellowLed, HIGH);
-    delay(1000);
-    digitalWrite(yellowLed, LOW);
+    lightColor(255, 225, 0);
+    delay(4000);
+    lightColor(0, 0, 0);
     
   }
 
@@ -138,9 +161,9 @@ void resultsState()
 void waitState() 
 {
   yforce = 0.0;
-  digitalWrite(redLed, HIGH);
-  delay(2500);
-  digitalWrite(redLed, LOW);
+  lightColor(255, 0, 0);
+  delay(3500);
+  lightColor(0, 0, 0);
 
   currentState = PLAY;
 
@@ -156,7 +179,24 @@ void endState()
 
 void lcdMaxScore() 
 {
+  // lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("High: " + String(maxY));
+}
+
+void pauseState()
+{
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print(String(maxY));
+  lcd.print("Game paused.");
+  lightColor(170, 0, 255);
+  delay(5000);
+
+  while(digitalRead(pauseButton) == 1);
+  delay(200);
+
+  lcd.clear();
+  lcdMaxScore();
+  currentState = WAIT;
+
 }
