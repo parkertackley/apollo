@@ -12,11 +12,12 @@ int blueLed = 10;
 float maxY = 0.0;
 float yforce = 0.0;
 
-enum state = {START, PLAY, RESULTS, WAIT};
+enum state {START, PLAY, RESULTS, WAIT, END};
 
 state currentState = PLAY;
 
-void setup() {
+void setup() 
+{
 
   Wire.begin();
   mpu.initialize();
@@ -39,44 +40,53 @@ void setup() {
 
 }
 
-void loop() {
+void loop() 
+{
 
   lcdMaxScore();
 
-  switch(currentState) {
-    case START:
-      startState();
+  while(1)
+  {
+    switch(currentState) 
+  { 
+      case START:
+        startState();
 
-    case PLAY:
-      playState();
+      case PLAY:
+        playState();
 
-    case RESULTS:
-      resultsState();
+      case RESULTS:
+        resultsState();
 
-    case WAIT:
-      waitState();
+      case WAIT:
+        waitState();
 
-    case END;
-      endState();
+      case END:
+        endState();
 
+    }
   }
+  
 
 }
 
 // Initial power on
-void startState() {
+void startState() 
+{
   currentState = PLAY;
   return;
 
 }
 
 // Player can throw
-void playState() {
+void playState() 
+{
   int16_t ax, ay, az, gx, gy, gz;
 
   int time = 1000;
 
-  while(time != 0) {
+  while(time != 0) 
+  {
     digitalWrite(blueLed, HIGH);
     mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
     
@@ -101,15 +111,19 @@ void playState() {
 }
 
 // calculating + displaying results
-void resultsState() {
-  if(abs(yforce) > abs(maxY)) {
+void resultsState() 
+  {
+  if(abs(yforce) > abs(maxY)) 
+    {
     maxY = yforce;
     digitalWrite(greenLed, HIGH);
     digitalWrite(yellowLed, LOW);
     delay(5000);
     digitalWrite(greenLed, LOW);
 
-  } else {
+  } 
+  else 
+  {
     digitalWrite(yellowLed, HIGH);
     delay(1000);
     digitalWrite(yellowLed, LOW);
@@ -121,7 +135,8 @@ void resultsState() {
 }
 
 // in between state for passing to other player(s)
-void waitState() {
+void waitState() 
+{
   yforce = 0.0;
   digitalWrite(redLed, HIGH);
   delay(2500);
@@ -132,13 +147,15 @@ void waitState() {
 }
 
 // end the game
-void endState() {
+void endState() 
+{
   // add end state functionality
   // if user decides to end the game, turn off arduino
   // if user wants to restart the game, set everything back to original values
 }
 
-void lcdMaxScore() {
+void lcdMaxScore() 
+{
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(String(maxY));
