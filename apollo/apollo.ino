@@ -10,7 +10,7 @@ int pauseButton = 7, stateButton = 6, endButton = 5;
 
 int maxY = 0.0, yforce = 0.0;
 
-enum state {START, PLAY, RESULTS, WAIT, END, PAUSE};
+enum state {START, PLAY, RESULTS, WAIT, PAUSE, END};
 
 state currentState = START;
 
@@ -39,11 +39,6 @@ void setup()
   delay(1000);
   lcd.clear();
 
-  lcd.setCursor(0, 0);
-  lcd.print("Press button 2");
-  lcd.setCursor(0, 1);
-  lcd.print("to begin!");
-
   Serial.begin(9600);
   Serial.println("Starting");
 
@@ -54,8 +49,15 @@ void loop()
   if(currentState != START)
     lcdMaxScore();
 
+  if(digitalRead(endButton) == 0 && currentState == END)
+  {
+    delay(200);
+    endState();
+  }
+
   if(digitalRead(pauseButton) == 0 && currentState != PAUSE)
   {
+    delay(200);
     currentState = PAUSE;
   }
 
@@ -75,10 +77,6 @@ void loop()
 
     case PAUSE:
       pauseState();
-      break;
-
-    case END:
-      endState();
       break;
 
     case START:
@@ -103,14 +101,20 @@ void lightColor(int r, int g, int b)
 void startState() 
 {
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Press button 2");
+  lcd.setCursor(0, 1);
+  lcd.print("to begin!");
+
   lightColor(255, 255, 255);
 
   while(digitalRead(stateButton) == 1);
 
+  delay(200);
   lcd.clear();
 
   currentState = PLAY;
-  return;
 
 }
 
@@ -186,20 +190,15 @@ void waitState()
   while(digitalRead(stateButton) == 1)
   {
     if(digitalRead(pauseButton) == 0)
+    {
       pauseState();
+    }
   }
+  delay(200);
   lcd.clear();
   delay(1000);
   currentState = PLAY;
 
-}
-
-// end the game
-void endState() 
-{
-  // add end state functionality
-  // if user decides to end the game, turn off arduino
-  // if user wants to restart the game, set everything back to original values
 }
 
 void lcdMaxScore() 
@@ -228,3 +227,38 @@ void pauseState()
   currentState = WAIT;
 
 }
+
+// TODO: get endstate to work when button 3 is pressed
+// -------------------------------
+// --------Broken code------------
+// -------------------------------
+// end the game
+// void endState() 
+// {
+//   lcd.clear();
+//   lcd.setCursor(0, 0);
+//   lcd.print("Game over.");
+//   lcd.setCursor(0, 1);
+//   lcd.print("Winner: " + maxY);
+
+//   delay(5000);
+
+//   lcd.clear();
+//   lcd.setCursor(0,0);
+//   lcd.print("Press Button 3");
+//   lcd.setCursor(0, 1);
+//   lcd.print("to restart.");
+
+//   while(digitalRead(endButton) == 1);
+//   delay(200);
+
+//   lcd.clear();
+//   lcd.setCursor(0, 0);
+//   lcd.print("resetting...");
+
+//   maxY = 0.0;
+//   yforce = 0.0;
+
+//   currentState = START;
+
+// }
