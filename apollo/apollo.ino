@@ -12,7 +12,7 @@ int maxY = 0.0, yforce = 0.0;
 
 enum state {START, PLAY, RESULTS, WAIT, END, PAUSE};
 
-state currentState = PLAY;
+state currentState = START;
 
 void setup() 
 {
@@ -28,6 +28,7 @@ void setup()
   lightColor(255, 255, 0);
 
   pinMode(pauseButton, INPUT_PULLUP);
+  pinMode(stateButton, INPUT_PULLUP);
 
   lcd.init();
   lcd.backlight();
@@ -38,6 +39,11 @@ void setup()
   delay(1000);
   lcd.clear();
 
+  lcd.setCursor(0, 0);
+  lcd.print("Press button 2");
+  lcd.setCursor(0, 1);
+  lcd.print("to begin!");
+
   Serial.begin(9600);
   Serial.println("Starting");
 
@@ -45,9 +51,8 @@ void setup()
 
 void loop() 
 {
-
-  lcdMaxScore();
-  Serial.println(digitalRead(pauseButton));
+  if(currentState != START)
+    lcdMaxScore();
 
   if(digitalRead(pauseButton) == 0 && currentState != PAUSE)
   {
@@ -56,10 +61,6 @@ void loop()
 
   switch(currentState) 
   { 
-    case START:
-      startState();
-      break;
-
     case PLAY:
       playState();
       break;
@@ -80,6 +81,14 @@ void loop()
       endState();
       break;
 
+    case START:
+      startState();
+      break;
+
+    default:
+      waitState();
+      break;
+
   }
 }
 
@@ -93,6 +102,13 @@ void lightColor(int r, int g, int b)
 // Initial power on
 void startState() 
 {
+
+  lightColor(255, 255, 255);
+
+  while(digitalRead(stateButton) == 1);
+
+  lcd.clear();
+
   currentState = PLAY;
   return;
 
@@ -139,11 +155,14 @@ void resultsState()
   if(abs(yforce) > abs(maxY)) 
     {
     maxY = yforce;
-    lightColor(0, 255, 0);
+    for(int i = 0; i < 5; ++i)
+    {
+      lightColor(0, 255, 0);
+      delay(500);
+      lightColor(0, 0, 0);
+      delay(250);
+    }
     lcdMaxScore();
-    delay(5000);
-    lightColor(0, 0, 0);
-
   } 
   else 
   {
@@ -160,11 +179,17 @@ void resultsState()
 // in between state for passing to other player(s)
 void waitState() 
 {
+
   yforce = 0.0;
   lightColor(255, 0, 0);
-  delay(3500);
-  lightColor(0, 0, 0);
 
+  while(digitalRead(stateButton) == 1)
+  {
+    if(digitalRead(pauseButton) == 0)
+      pauseState();
+  }
+  lcd.clear();
+  delay(1000);
   currentState = PLAY;
 
 }
@@ -179,7 +204,8 @@ void endState()
 
 void lcdMaxScore() 
 {
-  // lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("                    ");
   lcd.setCursor(0, 0);
   lcd.print("High: " + String(maxY));
 }
@@ -189,6 +215,8 @@ void pauseState()
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Game paused.");
+  lcd.setCursor(0, 1);
+  lcd.print("Btn 1: Continue!");
   lightColor(170, 0, 255);
   delay(5000);
 
