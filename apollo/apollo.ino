@@ -7,6 +7,7 @@ MPU6050 mpu;
 
 int redLed = 11, greenLed = 10, blueLed = 9;
 int pauseButton = 7, stateButton = 6, endButton = 5;
+int buzzer = 12;
 
 int maxY = 0.0, yforce = 0.0;
 
@@ -24,6 +25,8 @@ void setup()
   pinMode(redLed, OUTPUT);
   pinMode(greenLed, OUTPUT);
   pinMode(blueLed, OUTPUT);
+
+  pinMode(buzzer, OUTPUT);
 
   lightColor(255, 255, 0);
 
@@ -48,12 +51,6 @@ void loop()
 {
   if(currentState != START)
     lcdMaxScore();
-
-  if(digitalRead(endButton) == 0 && currentState == END)
-  {
-    delay(200);
-    endState();
-  }
 
   if(digitalRead(pauseButton) == 0 && currentState != PAUSE)
   {
@@ -159,6 +156,7 @@ void resultsState()
   if(abs(yforce) > abs(maxY)) 
     {
     maxY = yforce;
+    tone(buzzer, 1000);
     for(int i = 0; i < 5; ++i)
     {
       lightColor(0, 255, 0);
@@ -166,6 +164,9 @@ void resultsState()
       lightColor(0, 0, 0);
       delay(250);
     }
+    delay(250);
+    noTone(buzzer);
+
     lcdMaxScore();
   } 
   else 
