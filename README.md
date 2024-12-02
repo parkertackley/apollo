@@ -93,7 +93,7 @@ To get a local copy up and running follow these simple example steps.
    ```sh
    git clone git@github.com:parkertackley/apollo.git
    ```
-2. Install Arduino librarie
+2. Install Arduino libraries
    ```sh
    MPU6050 by Electronic cats and LiquidCrystal I2C by Frank de BraBander
    ```
@@ -108,7 +108,18 @@ To get a local copy up and running follow these simple example steps.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+After setting up all the components and installing the required libraries, we are ready to start using Apollo.
+To begin, upload the Arduino sketch to the connected Arduino. Once the sketch is uploaded, we will see the LCD turn on. After the initial setup period you will be greated with a screen that tells you to press button 2 to begin playing. The buttons are numbered 1-3 starting with the top most button, closest to the MPU6050, being button 1. 
+
+Once pressed, you will be in the play state which will allow you to simulate a throw, without actually throwing the device of course. You will know you're in the play state because the RGB light will be lit up blue. You will have just over a second to "throw". The peak speed of your throw will be measured, recorded, and displayed on the LCD. Note: The high score will always be shown on the LCD after the first attempt.
+
+After you have thrown, your score will be compared to the current top score. You will know that you've beat the high score by a flashing green light and a buzzing noise. If you haven't beaten a high score, you will see a yellow light.
+
+Once you have seen your results, a red light will appear indicating that all readings have paused and you can safely give the device to another person or ready yourself to throw again. When you or the other player is ready, press the 2nd button which is the same button used to start the game, to begin the next turn. You can throw as many times as you'd like.
+
+When you're ready to finish the throwing session or game you can press button 3, the bottom button, to end the game. You will be prompted with a game over screen and shown the high score of the session. To restart the game, simply press button 3 again when it prompts you to.
+
+NOTE: At any point in the game you can press and hold button 1, the top button, to pause the game. No recording will happen and you can stay in this state for an indefinate amount of time.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
