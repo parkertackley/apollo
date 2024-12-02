@@ -95,7 +95,7 @@ To get a local copy up and running follow these simple example steps.
    ```
 2. Install Arduino libraries
    ```sh
-   MPU6050 by Electronic cats and LiquidCrystal I2C by Frank de BraBander
+   MPU6050 by Electronic cats and LiquidCrystal I2C by Frank de Brabander
    ```
 3. Connect Arduino with Components listed
    
