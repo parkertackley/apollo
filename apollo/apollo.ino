@@ -2,19 +2,22 @@
 #include <MPU6050.h>
 #include <LiquidCrystal_I2C.h>
 
+// sets lcd and mpu
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 MPU6050 mpu;
 
+// components to proper pins
 int redLed = 11, greenLed = 10, blueLed = 9;
 int pauseButton = 7, stateButton = 6, endButton = 5;
 int buzzer = 12;
 
+// global variables
 int maxY = 0.0, yforce = 0.0;
-
 enum state {START, PLAY, RESULTS, WAIT, PAUSE, END};
-
 state currentState = START;
 
+// Initializes all components to either input or output
+// turns on LCD, and begins serial monitor
 void setup() 
 {
 
@@ -47,17 +50,21 @@ void setup()
 
 }
 
+// main loop
 void loop() 
 {
+  // displays the max score when not in the start state
   if(currentState != START)
     lcdMaxScore();
 
+  // if pause button is pressed, change state
   if(digitalRead(pauseButton) == 0 && currentState != PAUSE)
   {
     delay(200);
     currentState = PAUSE;
   }
 
+  // state machine
   switch(currentState) 
   { 
     case PLAY:
@@ -87,14 +94,12 @@ void loop()
   }
 }
 
-void lightColor(int r, int g, int b)
-{
-  analogWrite(redLed, r);
-  analogWrite(greenLed, g);
-  analogWrite(blueLed, b);
-}
+// -------------------------------
+// --------State Functions--------
+// -------------------------------
 
-// Initial power on
+// Initial state before start up
+// allows for user to start the game at any time
 void startState() 
 {
 
@@ -115,7 +120,8 @@ void startState()
 
 }
 
-// Player can throw
+// State that measures the "throwing" force of the current player
+// prints attempt to the screen
 void playState() 
 {
   int16_t ax, ay, az, gx, gy, gz;
@@ -150,7 +156,7 @@ void playState()
 
 }
 
-// calculating + displaying results
+// State to calculate the score and changes light if high score is achieved or not
 void resultsState() 
   {
   if(abs(yforce) > abs(maxY)) 
@@ -181,13 +187,14 @@ void resultsState()
 
 }
 
-// in between state for passing to other player(s)
+// State after the results state that waits for the user input to initialize another play loop
 void waitState() 
 {
 
   yforce = 0.0;
   lightColor(255, 0, 0);
 
+  // waits for user to press the state button to play the game
   while(digitalRead(stateButton) == 1)
   {
     if(digitalRead(pauseButton) == 0)
@@ -200,14 +207,6 @@ void waitState()
   delay(1000);
   currentState = PLAY;
 
-}
-
-void lcdMaxScore() 
-{
-  lcd.setCursor(0, 0);
-  lcd.print("                    ");
-  lcd.setCursor(0, 0);
-  lcd.print("High: " + String(maxY));
 }
 
 void pauseState()
@@ -229,6 +228,107 @@ void pauseState()
 
 }
 
+// -------------------------------
+// -------Helper Functions--------
+// -------------------------------
+
+// helper function to change rgb values of LED easily
+void lightColor(int r, int g, int b)
+{
+  analogWrite(redLed, r);
+  analogWrite(greenLed, g);
+  analogWrite(blueLed, b);
+}
+
+// helper function to print the high score to the screen
+void lcdMaxScore() 
+{
+  lcd.setCursor(0, 0);
+  lcd.print("                    ");
+  lcd.setCursor(0, 0);
+  lcd.print("High: " + String(maxY));
+}
+
+// -------------------------------
+// ------------Tests--------------
+// -------------------------------
+
+// Used to ensure LED is displaying all colors
+// for the "Timed LEDs" test in phase 2 documentation
+void testLED()
+{
+
+  lightColor(0, 0, 255);
+  delay(500);
+  lightColor(255, 0, 0);
+  delay(500);
+  lightColor(255, 255, 255);
+  delay(500);
+  lightColor(0, 255, 0);
+  delay(500);
+
+}
+
+// Used to test that when a high score is achieved
+// lights are flashed.
+// For the "Accelerometer High Score" test in phase 2 documentation
+void testHighScoreLED() 
+{
+  if(abs(yForce) > abs(maxY))
+  {
+    for(int i = 0; i < 5; ++i)
+    {
+      lightColor(0, 255, 0);
+      delay(500);
+      lightColor(0, 0, 0);
+      delay(250);
+    }
+  }
+}
+
+// Test to display the current high score
+// For the "LCD Scores" test in phase 2 documentation
+void testHighScoreLCD()
+{
+  if(abs(yForce) > abs(maxY))
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("High Score: " + maxY);
+  }
+}
+
+// Test for making sure all axes of accelerometer are working
+// For "Accelerometer Test" test in phase 2 documentation
+void testAxes() 
+{
+  int16_t ax, ay, az, gx, gy, gz;
+  int time = 2500;
+
+  while(--time)
+  {
+    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    Serial.println("Accel X: " + ax + " Accel Y: " + ay + " Accel Z: " + az + " Gyro X: " + gx + " Gyro Y: " + gy + " Gyro Z: " + gz);
+    // delay to allow for easier reading
+    delay(50);
+  }
+}
+
+// Used to test the buttons properly change the state
+// For "State Buttons" test in phase 2 documentation
+void testStateButtons()
+{
+  while(stateButton == 1);
+  delay(200);
+  Serial.println("State button pressed");
+  while(pauseButton == 1);
+  delay(200);
+  Serial.println("Pause button pressed");
+  while(endButton == 1);
+  delay(200);
+  Serial.println("End button pressed");
+}
+ 
 // TODO: get endstate to work when button 3 is pressed
 // -------------------------------
 // --------Broken code------------
