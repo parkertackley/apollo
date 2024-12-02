@@ -119,7 +119,7 @@ Once you have seen your results, a red light will appear indicating that all rea
 
 When you're ready to finish the throwing session or game you can press button 3, the bottom button, to end the game. You will be prompted with a game over screen and shown the high score of the session. To restart the game, simply press button 3 again when it prompts you to.
 
-NOTE: At any point in the game you can press and hold button 1, the top button, to pause the game. No recording will happen and you can stay in this state for an indefinate amount of time.
+NOTE: At any point in the game you can press and hold button 1, the top button, to pause the game. No recording will happen and you can stay in this state for an indefinite amount of time.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
