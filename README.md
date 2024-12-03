@@ -34,7 +34,7 @@
     <a href="https://github.com/parkertackley/apollo"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/parkertackley/apollo">View Demo</a>
+    <a href="https://www.youtube.com/watch?v=hk7yOFNB2Fw">View Demo</a>
   </p>
 </div>
 
@@ -63,7 +63,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![Product Name Screen Shot][product-screenshot]]([https://example.com](https://www.youtube.com/watch?v=hk7yOFNB2Fw))
 
 The Apollo project is a device that can measure the force of ones throw by using a MPU6050 paired with other components to get the accelerometer readings on the Y-axis.
 
